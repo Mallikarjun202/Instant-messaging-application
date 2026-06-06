@@ -343,4 +343,30 @@ public class GroupController {
         map.put("members", memberList);
         return map;
     }
+
+    @DeleteMapping("/api/groups/{groupId}/clear")
+    @Transactional
+    public ResponseEntity<?> clearGroupChat(@PathVariable Long groupId, Principal principal) {
+        if (principal == null)
+            return ResponseEntity.status(401).body("Not authenticated");
+
+        User me = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (me == null)
+            return ResponseEntity.status(404).body("User not found");
+
+        ChatGroup group = groupRepository.findById(groupId).orElse(null);
+        if (group == null)
+            return ResponseEntity.status(404).body("Group not found");
+
+        boolean isMember = group.getMembers().stream().anyMatch(u -> u.getId().equals(me.getId()));
+        if (!isMember)
+            return ResponseEntity.status(403).body("Not a member of this group");
+
+        List<GroupMessage> messages = groupMessageRepository
+                .findByGroupIdOrderByTimestampAsc(groupId, PageRequest.of(0, Integer.MAX_VALUE));
+        messages.forEach(m -> m.setDeleted(true));
+        groupMessageRepository.saveAll(messages);
+
+        return ResponseEntity.ok("Chat cleared");
+    }
 }

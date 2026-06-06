@@ -410,4 +410,23 @@ public class MessageController {
             userRepository.save(user);
         });
     }
+
+    @DeleteMapping("/api/messages/{otherId}/clear")
+    @Transactional
+    public ResponseEntity<?> clearDMChat(@PathVariable Long otherId, Principal principal) {
+        if (principal == null)
+            return ResponseEntity.status(401).body("Not authenticated");
+
+        User me = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (me == null)
+            return ResponseEntity.status(404).body("User not found");
+
+        // Soft delete all messages between the two users
+        List<Message> messages = messageRepository
+                .findConversation(me.getId(), otherId, PageRequest.of(0, Integer.MAX_VALUE));
+        messages.forEach(m -> m.setDeleted(true));
+        messageRepository.saveAll(messages);
+
+        return ResponseEntity.ok("Chat cleared");
+    }
 }

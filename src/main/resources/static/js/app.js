@@ -208,20 +208,34 @@ function chatMenuClear() {
   document.getElementById('chatMenu')?.classList.add('hidden');
   showConfirmModal(
     '🗑️ Clear chat',
-    'Clears messages from view. They reload next time you open this chat.',
+    'This will permanently clear all messages in this chat.',
     'Clear',
     () => {
       if (ACTIVE_RECEIVER_ID) {
-        clearedChats.dm.add(ACTIVE_RECEIVER_ID);
-        delete lastMsgPreviewDM[ACTIVE_RECEIVER_ID];
-        delete lastMsgTimeDM[ACTIVE_RECEIVER_ID];
+        // ✅ Call server to soft-delete messages
+        fetch(`/api/messages/${ACTIVE_RECEIVER_ID}/clear`, { method: 'DELETE' })
+          .then(() => {
+            clearedChats.dm.add(ACTIVE_RECEIVER_ID);
+            delete lastMsgPreviewDM[ACTIVE_RECEIVER_ID];
+            delete lastMsgTimeDM[ACTIVE_RECEIVER_ID];
+            messagesDiv.innerHTML = '';
+            messagesDiv.classList.remove('messages-empty');
+            loadSidebar();
+          })
+          .catch(() => showToast('❌ Error', 'Could not clear chat'));
       } else if (ACTIVE_GROUP_ID) {
-        clearedChats.group.add(ACTIVE_GROUP_ID);
-        delete lastMsgPreviewGroup[ACTIVE_GROUP_ID];
-        delete lastMsgTimeGroup[ACTIVE_GROUP_ID];
+        // ✅ Call server to soft-delete group messages
+        fetch(`/api/groups/${ACTIVE_GROUP_ID}/clear`, { method: 'DELETE' })
+          .then(() => {
+            clearedChats.group.add(ACTIVE_GROUP_ID);
+            delete lastMsgPreviewGroup[ACTIVE_GROUP_ID];
+            delete lastMsgTimeGroup[ACTIVE_GROUP_ID];
+            messagesDiv.innerHTML = '';
+            messagesDiv.classList.remove('messages-empty');
+            loadSidebar();
+          })
+          .catch(() => showToast('❌ Error', 'Could not clear chat'));
       }
-      messagesDiv.innerHTML = '';
-      messagesDiv.classList.remove('messages-empty');
     }
   );
 }
@@ -1299,11 +1313,26 @@ function showConvContextMenu(e, item) {
       else unreadGroup[item.id] = (unreadGroup[item.id] || 0) + 1;
       updatePageTitle();
       loadSidebar();
-    } else if (action === 'clear') {
-      if (item.type === 'dm') { delete lastMsgPreviewDM[item.id]; delete lastMsgTimeDM[item.id]; }
-      else { delete lastMsgPreviewGroup[item.id]; delete lastMsgTimeGroup[item.id]; }
+   } else if (action === 'clear') {
+  const url = item.type === 'dm'
+    ? `/api/messages/${item.id}/clear`
+    : `/api/groups/${item.id}/clear`;
+
+  fetch(url, { method: 'DELETE' })
+    .then(() => {
+      if (item.type === 'dm') {
+        delete lastMsgPreviewDM[item.id];
+        delete lastMsgTimeDM[item.id];
+        if (ACTIVE_RECEIVER_ID === item.id) messagesDiv.innerHTML = '';
+      } else {
+        delete lastMsgPreviewGroup[item.id];
+        delete lastMsgTimeGroup[item.id];
+        if (ACTIVE_GROUP_ID === item.id) messagesDiv.innerHTML = '';
+      }
       loadSidebar();
-    }
+    })
+    .catch(() => showToast('❌ Error', 'Could not clear chat'));
+}
     menu.remove();
   });
 
