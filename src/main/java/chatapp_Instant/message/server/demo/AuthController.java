@@ -64,6 +64,10 @@ public class AuthController {
         if (userDetails == null) {
             return ResponseEntity.status(401).body("Not authenticated");
         }
-        return ResponseEntity.ok(Map.of("username", userDetails.getUsername()));
+        User user = userRepository.findByUsername(userDetails.getUsername()).orElse(null);
+        if (user == null) {
+            return ResponseEntity.status(404).body("User not found");
+        }
+        return ResponseEntity.ok(Map.of("id", user.getId(), "username", user.getUsername()));
     }
 }
