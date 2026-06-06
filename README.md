@@ -83,9 +83,8 @@ mvn spring-boot:run
 ---
 
 ## 📁 Project Structure
-src/main/java/
+├── src/main/java/
 └── chatapp_Instant/message/server/demo/
-
 ├── MessagingAppApplication.java
 ├── AuthController.java
 ├── MessageController.java
@@ -98,11 +97,9 @@ src/main/java/
 └── *Repository.java
 
 src/main/resources/
-
 ├── application.properties
 ├── application-secure.properties.example
 └── static/
-
 ├── index.html / login.html / register.html
 ├── css/chat.css
 └── js/app.js
