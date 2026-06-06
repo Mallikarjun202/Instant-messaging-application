@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Instant messaging app — real-time chat with WebSocket" />
+  <title>Chat App</title>
+  <link rel="stylesheet" href="/css/chat.css" />
+</head>
+<body>
+
+  <div class="app-layout">
+
+    <!-- ── Sidebar ────────────────────────────────────────────────── -->
+    <aside class="sidebar">
+
+      <div class="sidebar-top">
+        <div class="profile-card">
+          <div id="myAvatar" class="avatar">U</div>
+          <div class="profile-info">
+            <h2 id="myUsername">Loading...</h2>
+            <p>● Online</p>
+          </div>
+        </div>
+        <button class="gear-btn" id="profileMenuBtn"
+                onclick="toggleProfileMenu()"
+                aria-label="Settings" title="Settings">⚙️</button>
+      </div>
+
+      <!-- Profile/Settings dropdown -->
+      <div id="profileMenu" class="profile-menu hidden">
+        <div class="profile-menu-header">
+          <div id="profileMenuAvatar" class="avatar" style="width:44px;height:44px;font-size:18px;">U</div>
+          <div>
+            <div id="profileMenuUsername" class="profile-menu-name">Loading...</div>
+            <div class="profile-menu-status">● Online</div>
+          </div>
+        </div>
+        <div class="profile-menu-divider"></div>
+        <button class="profile-menu-item" onclick="openCreateGroupModal(); toggleProfileMenu()">
+          <span class="pmenu-icon">👥</span><span>New group</span>
+        </button>
+        <button class="profile-menu-item" onclick="markAllAsRead()">
+          <span class="pmenu-icon">✅</span><span>Mark all as read</span>
+        </button>
+        <button class="profile-menu-item" onclick="toggleTheme()">
+          <span class="pmenu-icon" id="themeIcon">☀️</span>
+          <span id="themeLabel">Light mode</span>
+        </button>
+        <div class="profile-menu-divider"></div>
+
+        <!-- ✅ CSRF token injected by Thymeleaf / Spring for secure logout -->
+        <form action="/logout" method="post">
+          <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+          <button type="submit" class="profile-menu-item danger">
+            <span class="pmenu-icon">↪</span><span>Log out</span>
+          </button>
+        </form>
+
+      </div>
+
+      <div class="search-box">
+        <input type="text" id="searchInput"
+               placeholder="Search conversations..."
+               aria-label="Search conversations"
+               autocomplete="off" />
+      </div>
+
+      <div class="section-label conversations-label">
+        <span>Conversations</span>
+        <button class="new-group-btn" onclick="openCreateGroupModal()"
+                aria-label="New group" title="New group">＋</button>
+      </div>
+
+      <div id="conversationList" class="contact-list">
+        <p class="no-contacts">Loading conversations...</p>
+      </div>
+
+    </aside>
+
+    <!-- ── Resize handle ───────────────────────────────────────────── -->
+    <div class="resize-handle" id="resizeHandle"></div>
+
+    <!-- ── Chat panel ──────────────────────────────────────────────── -->
+    <main class="chat-panel">
+
+      <header class="chat-header">
+        <div id="chatAvatar" class="avatar">C</div>
+        <div class="info">
+          <h2 id="chatName">Select a contact</h2>
+          <p id="chatStatus">Start a conversation</p>
+        </div>
+
+        <button id="searchMsgBtn" class="header-icon-btn hidden"
+                aria-label="Search messages" title="Search messages">🔍</button>
+
+        <button id="memberPanelBtn" class="header-icon-btn" style="display:none"
+                onclick="toggleMemberPanel()"
+                aria-label="Show members" title="Show members">👥</button>
+
+        <button id="chatMenuBtn" class="header-icon-btn hidden"
+                aria-label="More options" title="More options"
+                onclick="toggleChatMenu()">⋮</button>
+
+        <div id="connectionStatus" class="disconnected">disconnected</div>
+      </header>
+
+      <!-- Chat options dropdown -->
+      <div id="chatMenu" class="chat-header-menu hidden"></div>
+
+      <!-- Message search bar -->
+      <div id="msgSearchBar" class="msg-search-bar hidden">
+        <input id="msgSearchInput" type="text"
+               placeholder="Search in conversation..."
+               aria-label="Search in conversation"
+               autocomplete="off" />
+        <button id="msgSearchClose" aria-label="Close search">✕</button>
+      </div>
+
+      <!-- Empty state -->
+      <div id="emptyState" class="empty-state">
+        <div class="empty-state-content">
+          <div class="empty-icon">💬</div>
+          <h3>Select a contact or group to start chatting</h3>
+          <p>Your conversations will appear here in real time.</p>
+        </div>
+      </div>
+
+      <!-- Active chat -->
+      <section id="chatArea" class="chat-area hidden">
+
+        <div id="messagesDiv" class="messages"></div>
+
+        <div id="typingIndicator" class="typing-indicator"></div>
+
+        <div id="replyBar" class="reply-bar hidden">
+          <span id="replyText" class="reply-text"></span>
+          <button id="cancelReply" class="cancel-reply" aria-label="Cancel reply">✕</button>
+        </div>
+
+        <div class="input-area">
+          <button id="emojiBtn" type="button"
+                  aria-label="Open emoji picker" title="Emoji">😊</button>
+
+          <div id="emojiPicker" class="emoji-picker">
+            <span class="emoji">😀</span><span class="emoji">😂</span>
+            <span class="emoji">😍</span><span class="emoji">🥰</span>
+            <span class="emoji">😎</span><span class="emoji">😭</span>
+            <span class="emoji">😡</span><span class="emoji">🤔</span>
+            <span class="emoji">👍</span><span class="emoji">👎</span>
+            <span class="emoji">❤️</span><span class="emoji">🔥</span>
+            <span class="emoji">💯</span><span class="emoji">🎉</span>
+            <span class="emoji">😊</span><span class="emoji">🙏</span>
+            <span class="emoji">💪</span><span class="emoji">🤣</span>
+            <span class="emoji">😅</span><span class="emoji">😢</span>
+            <span class="emoji">😤</span><span class="emoji">😏</span>
+            <span class="emoji">🥳</span><span class="emoji">🤩</span>
+            <span class="emoji">😴</span><span class="emoji">🤯</span>
+            <span class="emoji">🥺</span><span class="emoji">😇</span>
+            <span class="emoji">🤗</span><span class="emoji">😬</span>
+            <span class="emoji">🙄</span><span class="emoji">😑</span>
+            <span class="emoji">😒</span><span class="emoji">🤐</span>
+            <span class="emoji">😷</span><span class="emoji">🤒</span>
+            <span class="emoji">🤕</span><span class="emoji">🤑</span>
+            <span class="emoji">🤫</span><span class="emoji">🤭</span>
+          </div>
+
+          <div class="input-wrapper">
+            <input id="messageInput" type="text"
+                   placeholder="Type a message..."
+                   aria-label="Message input"
+                   autocomplete="off" />
+            <span id="charCounter" class="char-counter">0/2000</span> <!-- ✅ matches server limit -->
+          </div>
+
+          <button id="sendButton" type="button" aria-label="Send message">Send</button>
+        </div>
+      </section>
+
+      <!-- Member panel (groups) -->
+      <aside id="memberPanel" class="member-panel hidden">
+        <div id="memberPanelHero" class="member-panel-hero">
+          <button class="member-panel-close"
+                  onclick="hideMemberPanel()"
+                  aria-label="Close member panel">✕</button>
+          <div class="member-panel-group-avatar">#</div>
+          <div class="member-panel-group-name">Group</div>
+          <div class="member-panel-group-meta">0 members</div>
+        </div>
+        <div id="memberPanelList" class="member-panel-list"></div>
+      </aside>
+
+    </main>
+  </div>
+
+  <!-- ── Create Group Modal ──────────────────────────────────────── -->
+  <div id="createGroupModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Create Group</h3>
+        <button class="modal-close"
+                onclick="closeCreateGroupModal()"
+                aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <label class="field-label" for="groupNameInput">Group Name</label>
+        <input id="groupNameInput" type="text"
+               placeholder="e.g. Team Alpha"
+               maxlength="50"
+               autocomplete="off" class="modal-input" /> <!-- ✅ maxlength matches server -->
+        <label class="field-label" style="margin-top:16px;">Add Members</label>
+        <div id="memberCheckboxes" class="member-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeCreateGroupModal()">Cancel</button>
+        <button class="btn-primary" onclick="submitCreateGroup()">Create Group</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ SRI integrity checks on CDN scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"
+          crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"
+          crossorigin="anonymous"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

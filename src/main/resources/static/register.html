@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Create your Chat App account" />
+  <title>Register — Chat App</title>
+  <link rel="stylesheet" href="/css/chat.css" />
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-shell">
+    <div class="auth-box">
+
+      <div class="auth-top">
+        <div class="brand-avatar">C</div>
+        <div class="brand-copy">
+          <h1>Chat App</h1>
+          <p>Create your account</p>
+        </div>
+      </div>
+
+      <div class="auth-body">
+        <p id="msg" class="msg"></p>
+
+        <form id="registerForm">
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" type="text" name="username"
+                   placeholder="Choose a username"
+                   minlength="3" maxlength="30"
+                   autocomplete="username"
+                   required autofocus />
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" type="password" name="password"
+                   placeholder="Choose a password (min 6 characters)"
+                   minlength="6"
+                   autocomplete="new-password"
+                   required />
+          </div>
+
+          <button type="submit">Create Account</button>
+        </form>
+
+        <div class="auth-footer">
+          Already have an account? <a href="/login.html">Sign in</a>
+        </div>
+
+        <div class="mini-note">
+          Your password is stored securely with bcrypt hashing.
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const form  = document.getElementById('registerForm');
+    const msgEl = document.getElementById('msg');
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      msgEl.className = 'msg';
+      msgEl.style.display = 'none';
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value; // ✅ never trim passwords
+
+      // ✅ Client-side validation mirrors server-side rules
+      if (!username) {
+        show('Username is required.', 'error');
+        return;
+      }
+      if (username.length < 3 || username.length > 30) {
+        show('Username must be between 3 and 30 characters.', 'error');
+        return;
+      }
+      if (!password) {
+        show('Password is required.', 'error');
+        return;
+      }
+      if (password.length < 6) {
+        show('Password must be at least 6 characters.', 'error');
+        return;
+      }
+
+      try {
+        const params = new URLSearchParams({ username, password });
+        const res = await fetch('/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: params
+        });
+
+        const text = await res.text();
+
+        if (res.ok) {
+          show('Account created! Redirecting to login…', 'success');
+          setTimeout(() => { window.location = '/login.html'; }, 1400);
+        } else {
+          show(text || 'Registration failed.', 'error');
+        }
+      } catch {
+        show('Network error. Please try again.', 'error');
+      }
+    });
+
+    function show(text, type) {
+      msgEl.textContent = text;
+      msgEl.className   = `msg ${type} show`;
+    }
+  </script>
+</body>
+</html>

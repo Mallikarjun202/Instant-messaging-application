@@ -1,0 +1,36 @@
+# ── Secrets — NEVER commit these ──────────────────────────────────
+application-secure.properties
+*.env
+.env
+
+# ── Build output ───────────────────────────────────────────────────
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+
+# ── IDE ────────────────────────────────────────────────────────────
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Maven/Gradle wrappers (optional: keep if you want reproducible builds) ──
+# .mvn/
+# gradlew
+# gradlew.bat
+
+# ── Logs ───────────────────────────────────────────────────────────
+*.log
+logs/
+spring.log
+
+application-local.properties
+application-secure.properties

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sign in to Chat App" />
+  <title>Login — Chat App</title>
+  <link rel="stylesheet" href="/css/chat.css" />
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .auth-shell {
+      width: 100%;
+      max-width: 420px;
+    }
+    .login-wrap {
+      width: 100%;
+      background: var(--surface);
+      backdrop-filter: blur(18px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .login-header {
+      padding: 28px 28px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    }
+    .brand-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #8b5cf6 0%, #4f46e5 100%);
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      box-shadow: 0 14px 28px rgba(79, 70, 229, 0.28);
+      flex-shrink: 0;
+    }
+    .brand-copy h1 {
+      font-size: 24px;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 4px;
+    }
+    .brand-copy p {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-family: var(--font-mono);
+    }
+    .login-body {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .login-body form {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .field label {
+      font-size: 13px;
+      color: var(--text-soft);
+      font-weight: 600;
+    }
+    .login-body input {
+      background: rgba(19, 26, 43, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 16px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: var(--font-ui);
+      outline: none;
+      transition: border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .login-body input:focus {
+      border-color: rgba(56, 189, 248, 0.45);
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+    }
+    .login-body button[type="submit"] {
+      margin-top: 4px;
+      padding: 13px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(79, 70, 229, 0.28);
+      transition: transform 0.14s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    }
+    .login-body button[type="submit"]:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 32px rgba(79, 70, 229, 0.34);
+    }
+    .status-msg {
+      font-size: 12px;
+      font-family: var(--font-mono);
+      text-align: center;
+      display: none;
+      padding: 10px 12px;
+      border-radius: 12px;
+    }
+    .status-msg.error {
+      color: var(--danger);
+      background: rgba(248, 113, 113, 0.08);
+      border: 1px solid rgba(248, 113, 113, 0.18);
+    }
+    .status-msg.success {
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.08);
+      border: 1px solid rgba(74, 222, 128, 0.18);
+    }
+    .status-msg.show { display: block; }
+    .auth-footer {
+      margin-top: 4px;
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .auth-footer a {
+      color: #8ecbff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .auth-footer a:hover { text-decoration: underline; }
+    .mini-note {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-shell">
+    <div class="login-wrap">
+      <div class="login-header">
+        <div class="brand-avatar">C</div>
+        <div class="brand-copy">
+          <h1>Chat App</h1>
+          <p>Secure sign in to continue</p>
+        </div>
+      </div>
+
+      <div class="login-body">
+
+        <!-- ✅ Shows error or logout success depending on URL param -->
+        <p id="statusMsg" class="status-msg"></p>
+
+        <form action="/login" method="post">
+
+          <!-- ✅ CSRF token for Spring Security -->
+          <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
+
+          <div class="field">
+            <label for="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              name="username"
+              placeholder="Enter your username"
+              maxlength="30"
+              autocomplete="username"
+              required
+              autofocus
+            />
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <button type="submit">Sign In</button>
+        </form>
+
+        <div class="auth-footer">
+          New here? <a href="/register.html">Create an account</a>
+        </div>
+
+        <div class="mini-note">
+          Your account is authenticated against the app database.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ✅ Handle both error and logout messages from URL params
+    const params = new URLSearchParams(window.location.search);
+    const msg = document.getElementById('statusMsg');
+
+    if (params.get('error') === 'true') {
+      msg.textContent = 'Invalid username or password.';
+      msg.classList.add('error', 'show');
+    } else if (params.get('logout') === 'true') {
+      msg.textContent = 'You have been logged out successfully.';
+      msg.classList.add('success', 'show');
+    }
+  </script>
+</body>
+</html>
