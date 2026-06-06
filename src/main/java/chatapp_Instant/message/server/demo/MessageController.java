@@ -19,7 +19,7 @@ public class MessageController {
     private final MessageReactionRepository reactionRepository;
     private final UserRepository userRepository;
 
-    // ✅ Constructor injection
+    // Constructor injection
     public MessageController(SimpMessagingTemplate messagingTemplate,
             MessageRepository messageRepository,
             MessageReactionRepository reactionRepository,
@@ -107,7 +107,7 @@ public class MessageController {
         if (me == null)
             return ResponseEntity.status(404).body("Current user not found");
 
-        // ✅ Cap at 100 users — prevents loading entire DB
+        // Cap at 100 users — prevents loading entire DB
         List<Map<String, Object>> users = userRepository.findAll(PageRequest.of(0, 100))
                 .stream()
                 .filter(user -> !user.getId().equals(me.getId()))
@@ -118,12 +118,12 @@ public class MessageController {
                     map.put("lastSeen", user.getLastSeen() != null ? user.getLastSeen().toString() : "");
                     return map;
                 })
-                .toList(); // ✅ modern Java, no Collectors.toList()
+                .toList(); // modern Java, no Collectors.toList()
 
         return ResponseEntity.ok(users);
     }
 
-    // ✅ Replaced full-load with paginated query, just fetch last 1 message
+    // Replaced full-load with paginated query, just fetch last 1 message
     @GetMapping("/api/messages/{otherId}/last")
     @Transactional(readOnly = true)
     public ResponseEntity<?> getLastMessage(@PathVariable Long otherId, Principal principal) {
@@ -162,7 +162,7 @@ public class MessageController {
         if (principal == null)
             return ResponseEntity.status(401).body("Not authenticated");
 
-        // ✅ Cap page size to prevent abuse
+        // Cap page size to prevent abuse
         size = Math.min(size, 100);
 
         User me = userRepository.findByUsername(principal.getName()).orElse(null);
@@ -278,7 +278,7 @@ public class MessageController {
         if (emoji.isEmpty())
             return ResponseEntity.badRequest().body("Emoji required");
 
-        // ✅ Basic emoji validation — max 10 chars to block malicious strings
+        // Basic emoji validation — max 10 chars to block malicious strings
         if (emoji.length() > 10)
             return ResponseEntity.badRequest().body("Invalid emoji");
 
@@ -369,7 +369,7 @@ public class MessageController {
         if (content.isEmpty())
             return;
 
-        // ✅ Block empty or oversized messages
+        // Block empty or oversized messages
         if (content.length() > 2000)
             return;
 
@@ -381,7 +381,7 @@ public class MessageController {
         if (receiver == null)
             return;
 
-        // ✅ Block messaging yourself
+        // Block messaging yourself
         if (sender.getId().equals(receiver.getId()))
             return;
 

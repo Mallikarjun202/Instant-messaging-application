@@ -967,7 +967,7 @@ a:hover { text-decoration: underline; }
 [data-theme="light"] .member-panel,
 [data-theme="light"] .profile-menu { background: rgba(240, 244, 255, 0.96); }
 
-/* ✅ Light theme fixes for components missing overrides */
+/*  Light theme fixes for components missing overrides */
 [data-theme="light"] .toast { background: rgba(240,244,255,0.98); color: var(--text); border-color: var(--border-strong); }
 [data-theme="light"] .toast-body { color: var(--text-muted); }
 [data-theme="light"] .reaction-pill { background: rgba(0,0,0,0.06); color: var(--text-soft); }

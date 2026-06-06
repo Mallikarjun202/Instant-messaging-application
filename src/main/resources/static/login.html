@@ -166,12 +166,12 @@
 
       <div class="login-body">
 
-        <!-- ✅ Shows error or logout success depending on URL param -->
+        <!-- Shows error or logout success depending on URL param -->
         <p id="statusMsg" class="status-msg"></p>
 
         <form action="/login" method="post">
 
-          <!-- ✅ CSRF token for Spring Security -->
+          <!--  CSRF token for Spring Security -->
           <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
 
           <div class="field">
@@ -215,7 +215,7 @@
   </div>
 
   <script>
-    // ✅ Handle both error and logout messages from URL params
+    //  Handle both error and logout messages from URL params
     const params = new URLSearchParams(window.location.search);
     const msg = document.getElementById('statusMsg');
 

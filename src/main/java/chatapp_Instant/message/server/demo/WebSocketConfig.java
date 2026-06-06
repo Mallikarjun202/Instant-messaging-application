@@ -11,7 +11,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    // ✅ Read allowed origin from environment variable
+    // Read allowed origin from environment variable
     // locally defaults to localhost, on Render set ALLOWED_ORIGIN env var
     @Value("${app.allowed-origin:http://localhost:8080}")
     private String allowedOrigin;
@@ -20,7 +20,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
                 .addEndpoint("/ws")
-                .setAllowedOriginPatterns(allowedOrigin, "https://*.onrender.com") // ✅ restricted
+                .setAllowedOriginPatterns(allowedOrigin, "https://*.onrender.com") // restricted
                 .withSockJS();
     }
 

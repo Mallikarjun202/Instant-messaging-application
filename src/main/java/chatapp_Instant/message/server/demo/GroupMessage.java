@@ -14,22 +14,22 @@ public class GroupMessage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
-    @JsonIgnoreProperties({ "members", "createdBy", "hibernateLazyInitializer", "handler" }) // ✅ avoid circular refs
+    @JsonIgnoreProperties({ "members", "createdBy", "hibernateLazyInitializer", "handler" }) // avoid circular refs
     private ChatGroup group;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
-    @JsonIgnoreProperties({ "password", "hibernateLazyInitializer", "handler" }) // ✅ never expose password
+    @JsonIgnoreProperties({ "password", "hibernateLazyInitializer", "handler" }) // never expose password
     private User sender;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false, updatable = false) // ✅ enforced at DB level
+    @Column(nullable = false, updatable = false) // enforced at DB level
     private LocalDateTime timestamp;
 
     @Column(nullable = false)
-    private boolean deleted = false; // ✅ soft delete
+    private boolean deleted = false; // soft delete
 
     @PrePersist
     protected void onCreate() {

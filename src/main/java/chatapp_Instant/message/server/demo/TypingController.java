@@ -7,13 +7,13 @@ import org.springframework.stereotype.Controller;
 import java.security.Principal;
 
 @Controller
-public class TypingController { // 
+public class TypingController { //
 
     private final SimpMessagingTemplate messagingTemplate;
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
 
-    //  Constructor injection
+    // Constructor injection
     public TypingController(SimpMessagingTemplate messagingTemplate,
             UserRepository userRepository,
             GroupRepository groupRepository) {
@@ -26,7 +26,7 @@ public class TypingController { //
         private Long targetId; // userId for DM, null for group
         private Long groupId; // groupId for group, null for DM
 
-        // ✅ Removed username field — always derived from principal, never trusted from
+        // Removed username field — always derived from principal, never trusted from
         // client
 
         public Long getTargetId() {
@@ -46,7 +46,7 @@ public class TypingController { //
         }
     }
 
-    // ✅ Separate payload so username is set server-side only
+    // Separate payload so username is set server-side only
     public static class TypingPayload {
         private final String username;
         private final Long targetId;
@@ -76,12 +76,12 @@ public class TypingController { //
         if (principal == null || dto == null)
             return;
 
-        // ✅ Server always sets the username — never trust the client
+        //  Server always sets the username — never trust the client
         TypingPayload payload = new TypingPayload(
                 principal.getName(), dto.getTargetId(), dto.getGroupId());
 
         if (dto.getGroupId() != null) {
-            // ✅ Verify group exists before broadcasting
+            //  Verify group exists before broadcasting
             groupRepository.findById(dto.getGroupId()).ifPresent(group -> group.getMembers().forEach(member -> {
                 if (!member.getUsername().equals(principal.getName())) {
                     messagingTemplate.convertAndSendToUser(
@@ -89,7 +89,7 @@ public class TypingController { //
                 }
             }));
         } else if (dto.getTargetId() != null) {
-            // ✅ Verify target user exists before sending
+            // Verify target user exists before sending
             userRepository.findById(dto.getTargetId()).ifPresent(target -> messagingTemplate.convertAndSendToUser(
                     target.getUsername(), "/queue/typing", payload));
         }

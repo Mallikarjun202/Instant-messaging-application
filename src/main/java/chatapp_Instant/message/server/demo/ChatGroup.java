@@ -14,20 +14,20 @@ public class ChatGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50) // ✅ cap group name length
+    @Column(nullable = false, length = 50) // cap group name length
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id", nullable = false)
-    @JsonIgnoreProperties({ "password", "hibernateLazyInitializer", "handler" }) // ✅ safe serialization
+    @JsonIgnoreProperties({ "password", "hibernateLazyInitializer", "handler" }) // safe serialization
     private User createdBy;
 
-    @ManyToMany(fetch = FetchType.LAZY) // ✅ LAZY with @JsonIgnoreProperties instead of EAGER
+    @ManyToMany(fetch = FetchType.LAZY) // LAZY with @JsonIgnoreProperties instead of EAGER
     @JoinTable(name = "group_members", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     @JsonIgnoreProperties({ "password", "hibernateLazyInitializer", "handler" })
     private Set<User> members = new HashSet<>();
 
-    @Column(nullable = false, updatable = false) // ✅ enforced at DB level
+    @Column(nullable = false, updatable = false) // enforced at DB level
     private LocalDateTime createdAt;
 
     @PrePersist

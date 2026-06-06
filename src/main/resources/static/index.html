@@ -41,7 +41,7 @@
           <span class="pmenu-icon">👥</span><span>New group</span>
         </button>
         <button class="profile-menu-item" onclick="markAllAsRead()">
-          <span class="pmenu-icon">✅</span><span>Mark all as read</span>
+          <span class="pmenu-icon"></span><span>Mark all as read</span>
         </button>
         <button class="profile-menu-item" onclick="toggleTheme()">
           <span class="pmenu-icon" id="themeIcon">☀️</span>
@@ -49,7 +49,7 @@
         </button>
         <div class="profile-menu-divider"></div>
 
-        <!-- ✅ CSRF token injected by Thymeleaf / Spring for secure logout -->
+        <!--  CSRF token injected by Thymeleaf / Spring for secure logout -->
         <form action="/logout" method="post">
           <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
           <button type="submit" class="profile-menu-item danger">
@@ -170,7 +170,7 @@
                    placeholder="Type a message..."
                    aria-label="Message input"
                    autocomplete="off" />
-            <span id="charCounter" class="char-counter">0/2000</span> <!-- ✅ matches server limit -->
+            <span id="charCounter" class="char-counter">0/2000</span> <!--  matches server limit -->
           </div>
 
           <button id="sendButton" type="button" aria-label="Send message">Send</button>
@@ -207,7 +207,7 @@
         <input id="groupNameInput" type="text"
                placeholder="e.g. Team Alpha"
                maxlength="50"
-               autocomplete="off" class="modal-input" /> <!-- ✅ maxlength matches server -->
+               autocomplete="off" class="modal-input" /> <!-- maxlength matches server -->
         <label class="field-label" style="margin-top:16px;">Add Members</label>
         <div id="memberCheckboxes" class="member-list"></div>
       </div>
@@ -218,7 +218,7 @@
     </div>
   </div>
 
-  <!-- ✅ SRI integrity checks on CDN scripts -->
+  <!--  SRI integrity checks on CDN scripts -->
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"
           crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"

@@ -26,7 +26,7 @@ public class SecureSecurityConfig {
 
         private final UserRepository userRepository;
 
-        // ✅ Constructor injection — no @Autowired needed
+        // Constructor injection — no @Autowired needed
         public SecureSecurityConfig(UserRepository userRepository) {
                 this.userRepository = userRepository;
         }
@@ -42,7 +42,7 @@ public class SecureSecurityConfig {
                                                                 "/login.html", "/register.html",
                                                                 "/login", "/register")
                                                 .permitAll()
-                                                .anyRequest().authenticated()) // ✅ /api/me now requires auth
+                                                .anyRequest().authenticated()) // /api/me now requires auth
                                 .formLogin(form -> form
                                                 .loginPage("/login.html")
                                                 .loginProcessingUrl("/login")
@@ -55,7 +55,7 @@ public class SecureSecurityConfig {
                                                 .permitAll())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                                                .maximumSessions(1)); // ✅ one session per user
+                                                .maximumSessions(1)); // one session per user
 
                 return http.build();
         }
@@ -63,7 +63,7 @@ public class SecureSecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration config = new CorsConfiguration();
-                // ✅ Replace with your actual Render URL before deploying
+                // Replace with your actual Render URL before deploying
                 config.setAllowedOriginPatterns(List.of(
                                 "http://localhost:*",
                                 "https://*.onrender.com"));

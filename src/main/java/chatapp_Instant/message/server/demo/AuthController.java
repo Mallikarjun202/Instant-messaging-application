@@ -14,7 +14,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // ✅ Constructor injection
+    // Constructor injection
     public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -32,7 +32,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Username is required");
         }
 
-        // ✅ Length validation
+        // Length validation
         if (cleanUsername.length() < 3 || cleanUsername.length() > 30) {
             return ResponseEntity.badRequest().body("Username must be between 3 and 30 characters");
         }
@@ -41,7 +41,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Password is required");
         }
 
-        // ✅ Password strength check
+        // Password strength check
         if (cleanPassword.length() < 6) {
             return ResponseEntity.badRequest().body("Password must be at least 6 characters");
         }
@@ -58,7 +58,7 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
 
-    // ✅ Added /api/me endpoint — tells frontend who is logged in
+    // Added /api/me endpoint — tells frontend who is logged in
     @GetMapping("/api/me")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {

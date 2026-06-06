@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-   // ✅ Single pageable version — always use pagination to avoid loading all
+   // Single pageable version — always use pagination to avoid loading all
    // messages
    @Query("""
          SELECT m FROM Message m
@@ -25,7 +25,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
          @Param("otherId") Long otherId,
          Pageable pageable);
 
-   // ✅ Clearer naming — finds messages sent TO receiver that they haven't read yet
+   // Clearer naming — finds messages sent TO receiver that they haven't read yet
    @Query("""
          SELECT m FROM Message m
          WHERE m.sender.id = :senderId
@@ -38,7 +38,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
          @Param("senderId") Long senderId,
          @Param("receiverId") Long receiverId);
 
-   // ✅ Unread count — useful for notification badges in the UI
+   // Unread count — useful for notification badges in the UI
    @Query("""
          SELECT COUNT(m) FROM Message m
          WHERE m.receiver.id = :receiverId

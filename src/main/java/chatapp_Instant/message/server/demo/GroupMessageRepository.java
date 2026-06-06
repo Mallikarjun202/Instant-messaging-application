@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface GroupMessageRepository extends JpaRepository<GroupMessage, Long> {
 
-    // ✅ Excludes soft-deleted messages
+    // Excludes soft-deleted messages
     @Query("""
             SELECT m FROM GroupMessage m
             WHERE m.group.id = :groupId

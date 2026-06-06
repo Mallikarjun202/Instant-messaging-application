@@ -14,29 +14,29 @@ public class Message {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id", nullable = false)
-    @JsonIgnoreProperties({ "password", "hibernateLazyInitializer", "handler" }) // ✅ safe JSON serialization
+    @JsonIgnoreProperties({ "password", "hibernateLazyInitializer", "handler" }) //  safe JSON serialization
     private User sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id", nullable = false)
-    @JsonIgnoreProperties({ "password", "hibernateLazyInitializer", "handler" }) // ✅ never expose password
+    @JsonIgnoreProperties({ "password", "hibernateLazyInitializer", "handler" }) //  never expose password
     private User receiver;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false, updatable = false) // ✅ enforce at DB level
+    @Column(nullable = false, updatable = false) //  enforce at DB level
     private LocalDateTime timestamp;
 
     private boolean delivered;
 
     private boolean read;
 
-    @Column(nullable = true) // ✅ null means never edited
+    @Column(nullable = true) //  null means never edited
     private LocalDateTime editedAt;
 
     @Column(nullable = false)
-    private boolean deleted = false; // ✅ soft delete — hides message without wiping from DB
+    private boolean deleted = false; //  soft delete — hides message without wiping from DB
 
     @PrePersist
     protected void onCreate() {

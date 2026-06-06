@@ -18,7 +18,7 @@ public class GroupController {
     private final GroupMessageRepository groupMessageRepository;
     private final UserRepository userRepository;
 
-    // ✅ Constructor injection
+    // Constructor injection
     public GroupController(SimpMessagingTemplate messagingTemplate,
             GroupRepository groupRepository,
             GroupMessageRepository groupMessageRepository,
@@ -121,7 +121,7 @@ public class GroupController {
         if (name.isEmpty())
             return ResponseEntity.badRequest().body("Group name is required");
 
-        // ✅ Match the 50 char limit from ChatGroup.java
+        // Match the 50 char limit from ChatGroup.java
         if (name.length() > 50)
             return ResponseEntity.badRequest().body("Group name must be 50 characters or less");
 
@@ -138,7 +138,7 @@ public class GroupController {
 
         if (req.getMemberIds() != null) {
             for (Long id : req.getMemberIds()) {
-                // ✅ Cap group size at 50 members
+                // Cap group size at 50 members
                 if (members.size() >= 50)
                     break;
                 userRepository.findById(id).ifPresent(members::add);
@@ -165,7 +165,7 @@ public class GroupController {
                 .findGroupsByMemberId(me.getId())
                 .stream()
                 .map(g -> buildGroupMap(g, me.getId()))
-                .toList(); // ✅ modern Java
+                .toList(); // modern Java
 
         return ResponseEntity.ok(result);
     }
@@ -181,7 +181,7 @@ public class GroupController {
         if (principal == null)
             return ResponseEntity.status(401).body("Not authenticated");
 
-        // ✅ Cap page size
+        // Cap page size
         size = Math.min(size, 100);
 
         User me = userRepository.findByUsername(principal.getName()).orElse(null);
@@ -208,7 +208,7 @@ public class GroupController {
                     map.put("timestamp", m.getTimestamp().toString());
                     return map;
                 })
-                .toList(); // ✅ modern Java
+                .toList(); // modern Java
 
         return ResponseEntity.ok(messages);
     }
@@ -234,7 +234,7 @@ public class GroupController {
         if (!group.getCreatedBy().getId().equals(me.getId()))
             return ResponseEntity.status(403).body("Only the group creator can add members");
 
-        // ✅ Enforce member cap
+        // Enforce member cap
         if (group.getMembers().size() >= 50)
             return ResponseEntity.badRequest().body("Group has reached the maximum of 50 members");
 
@@ -290,7 +290,7 @@ public class GroupController {
         if (content.isEmpty())
             return;
 
-        // ✅ Block oversized messages
+        // Block oversized messages
         if (content.length() > 2000)
             return;
 
@@ -339,7 +339,7 @@ public class GroupController {
                     m.put("username", u.getUsername());
                     return m;
                 })
-                .toList(); // ✅ modern Java
+                .toList(); // modern Java
         map.put("members", memberList);
         return map;
     }

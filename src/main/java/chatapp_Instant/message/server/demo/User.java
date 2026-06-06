@@ -11,23 +11,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 30) // ✅ matches AuthController validation
+    @Column(unique = true, nullable = false, length = 30) // matches AuthController validation
     private String username;
 
-    @Column(nullable = false, length = 60) // ✅ BCrypt hash is always 60 chars
+    @Column(nullable = false, length = 60) // BCrypt hash is always 60 chars
     private String password;
 
-    @Column(length = 500) // ✅ enough for a URL or base64 thumbnail
+    @Column(length = 500) // enough for a URL or base64 thumbnail
     private String profilePicture;
 
     private LocalDateTime lastSeen;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt; // ✅ track when user registered
+    private LocalDateTime createdAt; // track when user registered
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now(); // ✅ auto-set on save
+        this.createdAt = LocalDateTime.now(); // auto-set on save
     }
 
     public Long getId() {

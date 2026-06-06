@@ -74,9 +74,9 @@
       msgEl.style.display = 'none';
 
       const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value; // ✅ never trim passwords
+      const password = document.getElementById('password').value; //  never trim passwords
 
-      // ✅ Client-side validation mirrors server-side rules
+      //  Client-side validation mirrors server-side rules
       if (!username) {
         show('Username is required.', 'error');
         return;

@@ -87,7 +87,7 @@ const msgSearchClose   = document.getElementById('msgSearchClose');
 const searchMsgBtn     = document.getElementById('searchMsgBtn');
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const MAX_CHARS = 2000; // ✅ matches server limit in MessageController
+const MAX_CHARS = 2000; //  matches server limit in MessageController
 
 // ─── Notification sound ───────────────────────────────────────────────────────
 function playNotifSound() {
@@ -421,7 +421,7 @@ function onError() {
 // ─── Typing ───────────────────────────────────────────────────────────────────
 function sendTyping() {
   if (!stompClient || !stompClient.connected) return;
-  // ✅ username removed from DTO — server derives it from principal
+  //  username removed from DTO — server derives it from principal
   if (ACTIVE_RECEIVER_ID) {
     stompClient.send('/app/typing', {}, JSON.stringify({ targetId: ACTIVE_RECEIVER_ID, groupId: null }));
   } else if (ACTIVE_GROUP_ID) {
@@ -728,7 +728,7 @@ function addMember(userId, username) {
       currentGroupData.memberCount = currentGroupData.members.length;
       renderMemberPanel();
       appendSystemMessage(`${CURRENT_USERNAME} added ${username} to the group`);
-      showToast('✅ Added', `${username} added to group`);
+      showToast(' Added', `${username} added to group`);
       loadSidebar();
     })
     .catch(() => showToast('❌ Error', 'Could not add member'));
@@ -747,7 +747,7 @@ function removeMember(userId, username) {
       currentGroupData.adminIds = admins;
       renderMemberPanel();
       appendSystemMessage(`${CURRENT_USERNAME} removed ${username || 'a member'} from the group`);
-      showToast('✅ Removed', `${username || 'Member'} removed`);
+      showToast(' Removed', `${username || 'Member'} removed`);
       loadSidebar();
     })
     .catch(() => showToast('❌ Error', 'Could not remove member'));
@@ -799,7 +799,7 @@ function sendMessage() {
   let content = messageInput.value.trim();
   if (!content || !stompClient || !stompClient.connected) return;
 
-  // ✅ Client-side length check matching server limit
+  // Client-side length check matching server limit
   if (content.length > MAX_CHARS) {
     showToast('❌ Too long', `Message must be under ${MAX_CHARS} characters`);
     return;
@@ -986,10 +986,10 @@ function loadUserCheckboxes() {
 function submitCreateGroup() {
   const name = document.getElementById('groupNameInput').value.trim();
 
-  // ✅ Use showToast instead of alert() for consistent UX
+  //  Use showToast instead of alert() for consistent UX
   if (!name) { showToast('❌ Error', 'Please enter a group name.'); return; }
 
-  // ✅ Validate group name length matches server limit
+  //  Validate group name length matches server limit
   if (name.length > 50) { showToast('❌ Error', 'Group name must be 50 characters or less.'); return; }
 
   const memberIds = [...document.querySelectorAll('#memberCheckboxes input:checked')].map(cb => Number(cb.value));
@@ -1181,7 +1181,7 @@ function loadSidebar() {
         .catch(() => { lastMsgPreviewDM[u.id] = ''; });
     });
 
-    // ✅ Use /last endpoint for groups too instead of loading all messages
+    //  Use /last endpoint for groups too instead of loading all messages
     const groupFetches = groups.map(g => {
       if (lastMsgPreviewGroup[g.id] !== undefined) return Promise.resolve();
       if (clearedChats.group.has(g.id)) return Promise.resolve();
