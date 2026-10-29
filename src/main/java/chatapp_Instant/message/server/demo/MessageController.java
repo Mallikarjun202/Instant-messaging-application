@@ -18,16 +18,25 @@ public class MessageController {
     private final MessageRepository messageRepository;
     private final MessageReactionRepository reactionRepository;
     private final UserRepository userRepository;
+    private final ChatClearRepository chatClearRepository;
 
     // Constructor injection
     public MessageController(SimpMessagingTemplate messagingTemplate,
             MessageRepository messageRepository,
             MessageReactionRepository reactionRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            ChatClearRepository chatClearRepository) {
         this.messagingTemplate = messagingTemplate;
         this.messageRepository = messageRepository;
         this.reactionRepository = reactionRepository;
         this.userRepository = userRepository;
+        this.chatClearRepository = chatClearRepository;
+    }
+
+    /** Only the two people in a direct conversation may see or react to its messages. */
+    private static boolean isParticipant(Message message, User user) {
+        return message.getSender().getId().equals(user.getId())
+                || message.getReceiver().getId().equals(user.getId());
     }
 
     // ── DTOs ────────────────────────────────────────────────────────
@@ -134,8 +143,9 @@ public class MessageController {
         if (me == null)
             return ResponseEntity.status(404).body("User not found");
 
-        List<Message> msgs = messageRepository
-                .findConversation(me.getId(), otherId, PageRequest.of(0, 1));
+        // Newest first, so the first row is the latest message
+        List<Message> msgs = messageRepository.findConversation(me.getId(), otherId,
+                chatClearRepository.visibleSince(me.getId(), ChatClear.DM, otherId), PageRequest.of(0, 1));
 
         if (msgs.isEmpty())
             return ResponseEntity.ok(null);
@@ -169,8 +179,12 @@ public class MessageController {
         if (me == null)
             return ResponseEntity.status(404).body("Current user not found");
 
-        List<Map<String, Object>> history = messageRepository
-                .findConversation(me.getId(), otherId, PageRequest.of(page, size))
+        // The query returns newest first; flip the page so the UI gets oldest to newest
+        List<Message> pageOfMessages = new ArrayList<>(messageRepository.findConversation(me.getId(), otherId,
+                chatClearRepository.visibleSince(me.getId(), ChatClear.DM, otherId), PageRequest.of(page, size)));
+        Collections.reverse(pageOfMessages);
+
+        List<Map<String, Object>> history = pageOfMessages
                 .stream()
                 .map(message -> {
                     Map<String, Object> map = new HashMap<>();
@@ -246,6 +260,14 @@ public class MessageController {
         if (principal == null)
             return ResponseEntity.status(401).body("Not authenticated");
 
+        User me = userRepository.findByUsername(principal.getName()).orElse(null);
+        if (me == null)
+            return ResponseEntity.status(404).body("User not found");
+
+        Message message = messageRepository.findById(messageId).orElse(null);
+        if (message == null || !isParticipant(message, me))
+            return ResponseEntity.status(404).body("Message not found");
+
         List<MessageReaction> reactions = reactionRepository.findByMessageId(messageId);
         Map<String, Object> result = new LinkedHashMap<>();
         reactions.forEach(r -> {
@@ -287,7 +309,8 @@ public class MessageController {
             return ResponseEntity.status(404).body("User not found");
 
         Message message = messageRepository.findById(messageId).orElse(null);
-        if (message == null)
+        // 404 rather than 403, so outsiders can't probe which message ids exist
+        if (message == null || !isParticipant(message, me))
             return ResponseEntity.status(404).body("Message not found");
 
         String action;
@@ -421,11 +444,13 @@ public class MessageController {
         if (me == null)
             return ResponseEntity.status(404).body("User not found");
 
-        // Soft delete all messages between the two users
-        List<Message> messages = messageRepository
-                .findConversation(me.getId(), otherId, PageRequest.of(0, Integer.MAX_VALUE));
-        messages.forEach(m -> m.setDeleted(true));
-        messageRepository.saveAll(messages);
+        // Clear for me only. The other person keeps their copy of the conversation.
+        chatClearRepository.markCleared(me.getId(), ChatClear.DM, otherId);
+
+        // Nothing I cleared should keep showing as unread
+        List<Message> unread = messageRepository.findUnreadMessages(otherId, me.getId());
+        unread.forEach(m -> m.setRead(true));
+        messageRepository.saveAll(unread);
 
         return ResponseEntity.ok("Chat cleared");
     }

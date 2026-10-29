@@ -208,11 +208,11 @@ function chatMenuClear() {
   document.getElementById('chatMenu')?.classList.add('hidden');
   showConfirmModal(
     '🗑️ Clear chat',
-    'This will permanently clear all messages in this chat.',
+    'This clears the chat for you only. Other people in the chat will still see these messages.',
     'Clear',
     () => {
       if (ACTIVE_RECEIVER_ID) {
-        // ✅ Call server to soft-delete messages
+        // Server hides these messages for this user only
         fetch(`/api/messages/${ACTIVE_RECEIVER_ID}/clear`, { method: 'DELETE' })
           .then(() => {
             clearedChats.dm.add(ACTIVE_RECEIVER_ID);
@@ -224,7 +224,7 @@ function chatMenuClear() {
           })
           .catch(() => showToast('❌ Error', 'Could not clear chat'));
       } else if (ACTIVE_GROUP_ID) {
-        // ✅ Call server to soft-delete group messages
+        // Server hides these group messages for this user only
         fetch(`/api/groups/${ACTIVE_GROUP_ID}/clear`, { method: 'DELETE' })
           .then(() => {
             clearedChats.group.add(ACTIVE_GROUP_ID);

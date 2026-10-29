@@ -20,7 +20,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
                 .addEndpoint("/ws")
-                .setAllowedOriginPatterns(allowedOrigin, "https://*.onrender.com") // restricted
+                .setAllowedOrigins(allowedOrigin) // only the app's own origin
                 .withSockJS();
     }
 

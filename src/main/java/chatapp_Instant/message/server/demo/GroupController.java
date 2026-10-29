@@ -17,16 +17,19 @@ public class GroupController {
     private final GroupRepository groupRepository;
     private final GroupMessageRepository groupMessageRepository;
     private final UserRepository userRepository;
+    private final ChatClearRepository chatClearRepository;
 
     // Constructor injection
     public GroupController(SimpMessagingTemplate messagingTemplate,
             GroupRepository groupRepository,
             GroupMessageRepository groupMessageRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            ChatClearRepository chatClearRepository) {
         this.messagingTemplate = messagingTemplate;
         this.groupRepository = groupRepository;
         this.groupMessageRepository = groupMessageRepository;
         this.userRepository = userRepository;
+        this.chatClearRepository = chatClearRepository;
     }
 
     // ── DTOs ────────────────────────────────────────────────────────
@@ -196,8 +199,12 @@ public class GroupController {
         if (!isMember)
             return ResponseEntity.status(403).body("Not a member of this group");
 
-        List<Map<String, Object>> messages = groupMessageRepository
-                .findByGroupIdOrderByTimestampAsc(groupId, PageRequest.of(page, size))
+        // The query returns newest first; flip the page so the UI gets oldest to newest
+        List<GroupMessage> pageOfMessages = new ArrayList<>(groupMessageRepository.findRecent(groupId,
+                chatClearRepository.visibleSince(me.getId(), ChatClear.GROUP, groupId), PageRequest.of(page, size)));
+        Collections.reverse(pageOfMessages);
+
+        List<Map<String, Object>> messages = pageOfMessages
                 .stream()
                 .map(m -> {
                     Map<String, Object> map = new HashMap<>();
@@ -362,10 +369,8 @@ public class GroupController {
         if (!isMember)
             return ResponseEntity.status(403).body("Not a member of this group");
 
-        List<GroupMessage> messages = groupMessageRepository
-                .findByGroupIdOrderByTimestampAsc(groupId, PageRequest.of(0, Integer.MAX_VALUE));
-        messages.forEach(m -> m.setDeleted(true));
-        groupMessageRepository.saveAll(messages);
+        // Clear for me only. Other members keep the group history.
+        chatClearRepository.markCleared(me.getId(), ChatClear.GROUP, groupId);
 
         return ResponseEntity.ok("Chat cleared");
     }

@@ -26,7 +26,9 @@ public class AuthController {
             @RequestParam String password) {
 
         String cleanUsername = username == null ? "" : username.trim();
-        String cleanPassword = password == null ? "" : password.trim();
+        // Don't trim the password: login uses it exactly as typed, so trimming
+        // here would lock out anyone whose password starts or ends with a space.
+        String cleanPassword = password == null ? "" : password;
 
         if (cleanUsername.isEmpty()) {
             return ResponseEntity.badRequest().body("Username is required");

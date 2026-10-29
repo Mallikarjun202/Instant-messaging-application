@@ -1,0 +1,4 @@
+# Copy to application-local.properties (it's in .gitignore) and fill in.
+spring.datasource.url=jdbc:postgresql://localhost:5432/chatdb_dev
+spring.datasource.username=postgres
+spring.datasource.password=your_password

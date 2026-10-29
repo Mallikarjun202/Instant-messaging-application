@@ -6,23 +6,26 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-   // Single pageable version — always use pagination to avoid loading all
-   // messages
+   // Newest first, so page 0 is the latest messages. Callers reverse a page
+   // before showing it. Only messages after `since` (the user's last clear).
    @Query("""
          SELECT m FROM Message m
          WHERE ((m.sender.id = :userId AND m.receiver.id = :otherId)
              OR (m.sender.id = :otherId AND m.receiver.id = :userId))
            AND m.deleted = false
-         ORDER BY m.timestamp ASC
+           AND m.timestamp > :since
+         ORDER BY m.timestamp DESC, m.id DESC
          """)
    List<Message> findConversation(
          @Param("userId") Long userId,
          @Param("otherId") Long otherId,
+         @Param("since") LocalDateTime since,
          Pageable pageable);
 
    // Clearer naming — finds messages sent TO receiver that they haven't read yet

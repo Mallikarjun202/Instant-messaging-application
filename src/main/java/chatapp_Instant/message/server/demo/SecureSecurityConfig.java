@@ -1,5 +1,6 @@
 package chatapp_Instant.message.server.demo;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -25,6 +26,10 @@ import java.util.List;
 public class SecureSecurityConfig {
 
         private final UserRepository userRepository;
+
+        // The app's own URL, e.g. https://messaging-application-6u6c.onrender.com
+        @Value("${app.allowed-origin}")
+        private String allowedOrigin;
 
         // Constructor injection — no @Autowired needed
         public SecureSecurityConfig(UserRepository userRepository) {
@@ -63,10 +68,9 @@ public class SecureSecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration config = new CorsConfiguration();
-                // Replace with your actual Render URL before deploying
-                config.setAllowedOriginPatterns(List.of(
-                                "http://localhost:*",
-                                "https://*.onrender.com"));
+                // Only the app's own origin. "*.onrender.com" would let any other
+                // Render-hosted site make logged-in requests on a user's behalf.
+                config.setAllowedOrigins(List.of(allowedOrigin));
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 config.setAllowedHeaders(List.of("*"));
                 config.setAllowCredentials(true);

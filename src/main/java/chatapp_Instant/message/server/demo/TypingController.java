@@ -3,6 +3,7 @@ package chatapp_Instant.message.server.demo;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.Principal;
 
@@ -71,7 +72,10 @@ public class TypingController { //
         }
     }
 
+    // Transactional so the lazy group.members collection can load. Without it,
+    // open-in-view=false means there is no session here and group typing fails.
     @MessageMapping("/typing")
+    @Transactional(readOnly = true)
     public void typing(TypingDTO dto, Principal principal) {
         if (principal == null || dto == null)
             return;
@@ -82,12 +86,19 @@ public class TypingController { //
 
         if (dto.getGroupId() != null) {
             //  Verify group exists before broadcasting
-            groupRepository.findById(dto.getGroupId()).ifPresent(group -> group.getMembers().forEach(member -> {
-                if (!member.getUsername().equals(principal.getName())) {
-                    messagingTemplate.convertAndSendToUser(
-                            member.getUsername(), "/queue/typing", payload);
-                }
-            }));
+            groupRepository.findById(dto.getGroupId()).ifPresent(group -> {
+                // Only members may signal typing into a group
+                boolean isMember = group.getMembers().stream()
+                        .anyMatch(m -> m.getUsername().equals(principal.getName()));
+                if (!isMember)
+                    return;
+                group.getMembers().forEach(member -> {
+                    if (!member.getUsername().equals(principal.getName())) {
+                        messagingTemplate.convertAndSendToUser(
+                                member.getUsername(), "/queue/typing", payload);
+                    }
+                });
+            });
         } else if (dto.getTargetId() != null) {
             // Verify target user exists before sending
             userRepository.findById(dto.getTargetId()).ifPresent(target -> messagingTemplate.convertAndSendToUser(
